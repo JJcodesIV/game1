@@ -1,0 +1,2085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eldoria: Shadows of Fate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#5D5CDE',
+                            dark: '#7A79E8',
+                            light: '#8F8EF0'
+                        },
+                        background: {
+                            light: '#FFFFFF',
+                            dark: '#181818'
+                        },
+                        card: {
+                            light: '#F0F0F0',
+                            dark: '#2A2A2A'
+                        },
+                        text: {
+                            light: '#333333',
+                            dark: '#E0E0E0'
+                        }
+                    },
+                    fontFamily: {
+                        fantasy: ['Palatino', 'Georgia', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .typing-effect {
+            overflow: hidden;
+            white-space: nowrap;
+            margin: 0;
+            width: 0;
+            animation: typing 3.5s steps(40, end) forwards;
+        }
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        .dark .prose {
+            color: #E0E0E0;
+        }
+        .prose p, .prose h1, .prose h2, .prose h3, .prose h4 {
+            margin-bottom: 1rem;
+        }
+        .prose strong {
+            font-weight: bold;
+            color: #5D5CDE;
+        }
+        .dark .prose strong {
+            color: #7A79E8;
+        }
+        .char-avatar {
+            transition: all 0.3s ease;
+        }
+        .char-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(93, 92, 222, 0.5);
+        }
+        .dark .char-avatar:hover {
+            box-shadow: 0 0 15px rgba(122, 121, 232, 0.5);
+        }
+        /* Health and mana bars */
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="font-fantasy bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark min-h-screen transition-colors duration-300">
+    <!-- Game Container -->
+    <div id="game-container" class="container mx-auto px-4 py-5 max-w-4xl">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-primary dark:text-primary-dark mb-3 md:mb-0">
+                Eldoria: Shadows of Fate
+            </h1>
+            <div class="flex items-center space-x-4">
+                <button id="toggleAudio" class="p-2 rounded-full bg-primary text-white hover:bg-primary-light transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6a7.975 7.975 0 015.658 2.343M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </button>
+                <button id="saveGame" class="p-2 rounded-full bg-primary text-white hover:bg-primary-light transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Game Screens -->
+        <div id="game-screens">
+            <!-- Start Screen -->
+            <div id="start-screen" class="fade-in">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl md:text-3xl mb-2 font-bold">Welcome to the Realm of Eldoria</h2>
+                    <p class="text-lg">A land of magic, mystery, and adventure awaits...</p>
+                </div>
+                <div class="flex justify-center">
+                    <div class="bg-[#000] bg-opacity-50 w-full max-w-2xl h-64 md:h-80 flex items-center justify-center relative overflow-hidden rounded-lg mb-6">
+                        <div id="title-art" class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-4xl md:text-6xl font-bold text-white text-center">
+                                <div class="typing-effect">Eldoria: Shadows of Fate</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col space-y-4 items-center">
+                    <button id="new-game" class="bg-primary hover:bg-primary-light text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 w-64">
+                        New Game
+                    </button>
+                    <button id="load-game" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 w-64">
+                        Load Game
+                    </button>
+                    <button id="about-game" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 w-64">
+                        About
+                    </button>
+                </div>
+            </div>
+
+            <!-- Character Creation Screen -->
+            <div id="character-creation" class="hidden">
+                <h2 class="text-2xl md:text-3xl mb-4 font-bold text-center">Character Creation</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Character Preview -->
+                    <div class="bg-card-light dark:bg-card-dark p-6 rounded-lg">
+                        <h3 class="text-xl font-bold mb-4 text-center">Preview</h3>
+                        <div class="flex justify-center mb-4">
+                            <div id="character-avatar" class="w-32 h-32 rounded-full bg-primary flex items-center justify-center text-white text-4xl font-bold">
+                                ?
+                            </div>
+                        </div>
+                        <div id="character-summary" class="text-center">
+                            <p class="mb-2">Choose your character's details...</p>
+                            <div class="grid grid-cols-2 gap-2 mt-4">
+                                <div class="bg-background-light dark:bg-background-dark p-2 rounded">
+                                    <span class="font-bold">Health:</span> <span id="preview-health">0</span>
+                                </div>
+                                <div class="bg-background-light dark:bg-background-dark p-2 rounded">
+                                    <span class="font-bold">Mana:</span> <span id="preview-mana">0</span>
+                                </div>
+                                <div class="bg-background-light dark:bg-background-dark p-2 rounded">
+                                    <span class="font-bold">Strength:</span> <span id="preview-strength">0</span>
+                                </div>
+                                <div class="bg-background-light dark:bg-background-dark p-2 rounded">
+                                    <span class="font-bold">Intelligence:</span> <span id="preview-intelligence">0</span>
+                                </div>
+                                <div class="bg-background-light dark:bg-background-dark p-2 rounded">
+                                    <span class="font-bold">Dexterity:</span> <span id="preview-dexterity">0</span>
+                                </div>
+                                <div class="bg-background-light dark:bg-background-dark p-2 rounded">
+                                    <span class="font-bold">Charisma:</span> <span id="preview-charisma">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Character Options -->
+                    <div class="bg-card-light dark:bg-card-dark p-6 rounded-lg">
+                        <form id="character-form">
+                            <div class="mb-4">
+                                <label for="char-name" class="block font-bold mb-2">Name</label>
+                                <input type="text" id="char-name" class="w-full p-2 rounded bg-white dark:bg-gray-700 text-black dark:text-white border border-gray-300 dark:border-gray-600 text-base" placeholder="Enter your character's name" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="block font-bold mb-2">Race</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="race-option cursor-pointer p-2 rounded-lg border-2 border-transparent hover:border-primary dark:hover:border-primary-dark">
+                                        <input type="radio" name="race" id="race-human" value="human" class="hidden" checked>
+                                        <label for="race-human" class="cursor-pointer block text-center">
+                                            <div class="font-bold">Human</div>
+                                            <div class="text-sm">+2 All Stats</div>
+                                        </label>
+                                    </div>
+                                    <div class="race-option cursor-pointer p-2 rounded-lg border-2 border-transparent hover:border-primary dark:hover:border-primary-dark">
+                                        <input type="radio" name="race" id="race-elf" value="elf" class="hidden">
+                                        <label for="race-elf" class="cursor-pointer block text-center">
+                                            <div class="font-bold">Elf</div>
+                                            <div class="text-sm">+3 Dex, +3 Int</div>
+                                        </label>
+                                    </div>
+                                    <div class="race-option cursor-pointer p-2 rounded-lg border-2 border-transparent hover:border-primary dark:hover:border-primary-dark">
+                                        <input type="radio" name="race" id="race-dwarf" value="dwarf" class="hidden">
+                                        <label for="race-dwarf" class="cursor-pointer block text-center">
+                                            <div class="font-bold">Dwarf</div>
+                                            <div class="text-sm">+4 Str, +2 Health</div>
+                                        </label>
+                                    </div>
+                                    <div class="race-option cursor-pointer p-2 rounded-lg border-2 border-transparent hover:border-primary dark:hover:border-primary-dark">
+                                        <input type="radio" name="race" id="race-orc" value="orc" class="hidden">
+                                        <label for="race-orc" class="cursor-pointer block text-center">
+                                            <div class="font-bold">Orc</div>
+                                            <div class="text-sm">+6 Str, -1 Int</div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="block font-bold mb-2">Class</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="class-option cursor-pointer p-2 rounded-lg border-2 border-transparent hover:border-primary dark:hover:border-primary-dark">
+                                        <input type="radio" name="class" id="class-warrior" value="warrior" class="hidden" checked>
+                                        <label for="class-warrior" class="cursor-pointer block text-center">
+                                            <div class="font-bold">Warrior</div>
+                                            <div class="text-sm">+5 Health, Melee</div>
+                                        </label>
+                                    </div>
+                                    <div class="class-option cursor-pointer p-2 rounded-lg border-2 border-transparent hover:border-primary dark:hover:border-primary-dark">
+                                        <input type="radio" name="class" id="class-mage" value="mage" class="hidden">
+                                        <label for="class-mage" class="cursor-pointer block text-center">
+                                            <div class="font-bold">Mage</div>
+                                            <div class="text-sm">+5 Mana, Magic</div>
+                                        </label>
+                                    </div>
+                                    <div class="class-option cursor-pointer p-2 rounded-lg border-2 border-transparent hover:border-primary dark:hover:border-primary-dark">
+                                        <input type="radio" name="class" id="class-ranger" value="ranger" class="hidden">
+                                        <label for="class-ranger" class="cursor-pointer block text-center">
+                                            <div class="font-bold">Ranger</div>
+                                            <div class="text-sm">+3 Dex, Ranged</div>
+                                        </label>
+                                    </div>
+                                    <div class="class-option cursor-pointer p-2 rounded-lg border-2 border-transparent hover:border-primary dark:hover:border-primary-dark">
+                                        <input type="radio" name="class" id="class-rogue" value="rogue" class="hidden">
+                                        <label for="class-rogue" class="cursor-pointer block text-center">
+                                            <div class="font-bold">Rogue</div>
+                                            <div class="text-sm">+3 Cha, Stealth</div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="block font-bold mb-2">Background</label>
+                                <select id="char-background" class="w-full p-2 rounded bg-white dark:bg-gray-700 text-black dark:text-white border border-gray-300 dark:border-gray-600 text-base">
+                                    <option value="noble">Noble (+2 Charisma, -1 Strength)</option>
+                                    <option value="soldier">Soldier (+2 Strength, -1 Charisma)</option>
+                                    <option value="scholar">Scholar (+2 Intelligence, -1 Strength)</option>
+                                    <option value="outlaw">Outlaw (+2 Dexterity, -1 Charisma)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="text-center mt-6">
+                                <button type="submit" class="bg-primary hover:bg-primary-light text-white font-bold py-2 px-6 rounded-lg transition-all duration-200 transform hover:scale-105">
+                                    Create Character
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Game Screen -->
+            <div id="game-screen" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Left Column: Character Info -->
+                    <div class="bg-card-light dark:bg-card-dark rounded-lg p-4">
+                        <div class="mb-4 flex items-center">
+                            <div id="game-character-avatar" class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-2xl font-bold mr-3">
+                                ?
+                            </div>
+                            <div>
+                                <h3 id="game-character-name" class="text-xl font-bold">Character</h3>
+                                <p id="game-character-details" class="text-sm">Race, Class</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="flex justify-between mb-1">
+                                <span>Health</span>
+                                <span id="health-display">100/100</span>
+                            </div>
+                            <div class="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-3">
+                                <div id="health-bar" class="bg-red-500 rounded-full h-3 progress-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="flex justify-between mb-1">
+                                <span>Mana</span>
+                                <span id="mana-display">50/50</span>
+                            </div>
+                            <div class="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-3">
+                                <div id="mana-bar" class="bg-blue-500 rounded-full h-3 progress-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="flex justify-between mb-1">
+                                <span>Experience</span>
+                                <span id="xp-display">0/100</span>
+                            </div>
+                            <div class="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-3">
+                                <div id="xp-bar" class="bg-green-500 rounded-full h-3 progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2 mt-4">
+                            <div class="bg-background-light dark:bg-background-dark p-2 rounded text-sm">
+                                <span class="font-bold">STR:</span> <span id="game-strength">0</span>
+                            </div>
+                            <div class="bg-background-light dark:bg-background-dark p-2 rounded text-sm">
+                                <span class="font-bold">INT:</span> <span id="game-intelligence">0</span>
+                            </div>
+                            <div class="bg-background-light dark:bg-background-dark p-2 rounded text-sm">
+                                <span class="font-bold">DEX:</span> <span id="game-dexterity">0</span>
+                            </div>
+                            <div class="bg-background-light dark:bg-background-dark p-2 rounded text-sm">
+                                <span class="font-bold">CHA:</span> <span id="game-charisma">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 flex flex-col space-y-2">
+                            <button id="inventory-button" class="bg-primary hover:bg-primary-light text-white py-2 px-4 rounded transition-colors">
+                                Inventory
+                            </button>
+                            <button id="skills-button" class="bg-primary hover:bg-primary-light text-white py-2 px-4 rounded transition-colors">
+                                Skills
+                            </button>
+                            <button id="map-button" class="bg-primary hover:bg-primary-light text-white py-2 px-4 rounded transition-colors">
+                                Map
+                            </button>
+                            <button id="journal-button" class="bg-primary hover:bg-primary-light text-white py-2 px-4 rounded transition-colors">
+                                Journal
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Middle Column: Story & Choices -->
+                    <div class="md:col-span-2 flex flex-col h-full">
+                        <div class="bg-card-light dark:bg-card-dark rounded-lg p-4 mb-4 flex-grow overflow-auto max-h-[50vh] relative">
+                            <div id="location-name" class="font-bold text-lg mb-2">Current Location</div>
+                            <div id="story-text" class="prose max-w-none overflow-auto mb-4">
+                                Your adventure begins...
+                            </div>
+                            <div id="combat-container" class="hidden">
+                                <div class="border-t border-gray-300 dark:border-gray-700 pt-3 mt-3">
+                                    <h3 class="font-bold text-lg mb-2">Combat</h3>
+                                    <div id="enemy-container" class="mb-3">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span id="enemy-name" class="font-bold">Enemy</span>
+                                            <span id="enemy-health-display">100/100</span>
+                                        </div>
+                                        <div class="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-3">
+                                            <div id="enemy-health-bar" class="bg-red-500 rounded-full h-3 progress-bar" style="width: 100%"></div>
+                                        </div>
+                                    </div>
+                                    <div id="combat-log" class="text-sm mb-3 max-h-32 overflow-y-auto bg-gray-100 dark:bg-gray-800 p-2 rounded">
+                                        Combat begins!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-card-light dark:bg-card-dark rounded-lg p-4">
+                            <div id="choice-container" class="flex flex-col space-y-2">
+                                <!-- Choices will be dynamically inserted here -->
+                            </div>
+                            <div id="combat-actions" class="hidden flex flex-col space-y-2">
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="combat-action bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded transition-colors" data-action="attack">
+                                        Attack
+                                    </button>
+                                    <button class="combat-action bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded transition-colors" data-action="skill">
+                                        Use Skill
+                                    </button>
+                                    <button class="combat-action bg-green-600 hover:bg-green-500 text-white py-2 px-4 rounded transition-colors" data-action="item">
+                                        Use Item
+                                    </button>
+                                    <button class="combat-action bg-yellow-600 hover:bg-yellow-500 text-white py-2 px-4 rounded transition-colors" data-action="defend">
+                                        Defend
+                                    </button>
+                                    <button class="combat-action bg-purple-600 hover:bg-purple-500 text-white py-2 px-4 rounded transition-colors" data-action="flee">
+                                        Flee
+                                    </button>
+                                </div>
+                                <div id="skill-buttons" class="hidden flex flex-wrap gap-2">
+                                    <!-- Skill buttons will be added here -->
+                                </div>
+                                <div id="item-buttons" class="hidden flex flex-wrap gap-2">
+                                    <!-- Item buttons will be added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Inventory Screen -->
+            <div id="inventory-screen" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">Inventory</h2>
+                    <button id="close-inventory" class="bg-gray-600 hover:bg-gray-500 text-white py-1 px-3 rounded transition-colors">
+                        Close
+                    </button>
+                </div>
+                <div class="bg-card-light dark:bg-card-dark rounded-lg p-4">
+                    <div class="mb-3 flex justify-between">
+                        <span>Gold: <span id="gold-display">0</span></span>
+                        <span>Items: <span id="inventory-count">0</span>/<span id="inventory-max">20</span></span>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2" id="inventory-grid">
+                        <!-- Inventory slots will be added here -->
+                    </div>
+                    <div id="item-details" class="mt-4 p-3 bg-background-light dark:bg-background-dark rounded-lg hidden">
+                        <h3 id="item-name" class="font-bold mb-1">Item Name</h3>
+                        <p id="item-description" class="text-sm mb-2">Item description...</p>
+                        <div class="flex space-x-2">
+                            <button id="use-item" class="bg-primary hover:bg-primary-light text-white py-1 px-3 rounded text-sm transition-colors">
+                                Use
+                            </button>
+                            <button id="equip-item" class="bg-primary hover:bg-primary-light text-white py-1 px-3 rounded text-sm transition-colors">
+                                Equip
+                            </button>
+                            <button id="drop-item" class="bg-red-600 hover:bg-red-500 text-white py-1 px-3 rounded text-sm transition-colors">
+                                Drop
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-card-light dark:bg-card-dark rounded-lg p-4 mt-4">
+                    <h3 class="font-bold mb-3">Equipment</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="equipment-slot bg-background-light dark:bg-background-dark p-2 rounded-lg" data-slot="weapon">
+                            <div class="text-sm font-bold mb-1">Weapon</div>
+                            <div class="equipment-item text-sm text-gray-500 dark:text-gray-400">Empty</div>
+                        </div>
+                        <div class="equipment-slot bg-background-light dark:bg-background-dark p-2 rounded-lg" data-slot="armor">
+                            <div class="text-sm font-bold mb-1">Armor</div>
+                            <div class="equipment-item text-sm text-gray-500 dark:text-gray-400">Empty</div>
+                        </div>
+                        <div class="equipment-slot bg-background-light dark:bg-background-dark p-2 rounded-lg" data-slot="helmet">
+                            <div class="text-sm font-bold mb-1">Helmet</div>
+                            <div class="equipment-item text-sm text-gray-500 dark:text-gray-400">Empty</div>
+                        </div>
+                        <div class="equipment-slot bg-background-light dark:bg-background-dark p-2 rounded-lg" data-slot="gloves">
+                            <div class="text-sm font-bold mb-1">Gloves</div>
+                            <div class="equipment-item text-sm text-gray-500 dark:text-gray-400">Empty</div>
+                        </div>
+                        <div class="equipment-slot bg-background-light dark:bg-background-dark p-2 rounded-lg" data-slot="boots">
+                            <div class="text-sm font-bold mb-1">Boots</div>
+                            <div class="equipment-item text-sm text-gray-500 dark:text-gray-400">Empty</div>
+                        </div>
+                        <div class="equipment-slot bg-background-light dark:bg-background-dark p-2 rounded-lg" data-slot="amulet">
+                            <div class="text-sm font-bold mb-1">Amulet</div>
+                            <div class="equipment-item text-sm text-gray-500 dark:text-gray-400">Empty</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal for various purposes -->
+        <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-background-light dark:bg-background-dark rounded-lg p-6 max-w-md w-full">
+                <h3 id="modal-title" class="text-xl font-bold mb-4">Title</h3>
+                <div id="modal-content" class="mb-4">Content goes here</div>
+                <div id="modal-buttons" class="flex justify-end space-x-3">
+                    <button id="modal-cancel" class="bg-gray-600 hover:bg-gray-500 text-white py-2 px-4 rounded transition-colors">
+                        Cancel
+                    </button>
+                    <button id="modal-confirm" class="bg-primary hover:bg-primary-light text-white py-2 px-4 rounded transition-colors">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dark mode detection and initialization
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // Game state and data
+        const gameState = {
+            character: {
+                name: "",
+                race: "",
+                class: "",
+                background: "",
+                health: 0,
+                maxHealth: 0,
+                mana: 0,
+                maxMana: 0,
+                xp: 0,
+                level: 1,
+                nextLevelXp: 100,
+                gold: 0,
+                stats: {
+                    strength: 0,
+                    intelligence: 0,
+                    dexterity: 0,
+                    charisma: 0
+                },
+                inventory: [],
+                equipment: {
+                    weapon: null,
+                    armor: null,
+                    helmet: null,
+                    gloves: null,
+                    boots: null,
+                    amulet: null
+                },
+                skills: [],
+                avatarColor: "#5D5CDE"
+            },
+            currentLocation: "crossroads",
+            visitedLocations: new Set(["crossroads"]),
+            questLog: [],
+            activeQuests: [],
+            completedQuests: [],
+            storyProgress: {
+                mainQuest: 0,
+                branchingChoices: {}
+            },
+            combat: {
+                inCombat: false,
+                enemy: null,
+                turn: 0,
+                playerActionPoints: 3,
+                enemyActionPoints: 2,
+                log: []
+            }
+        };
+
+        // Game data: items, locations, enemies, etc.
+        const gameData = {
+            items: {
+                healthPotion: {
+                    id: "healthPotion",
+                    name: "Health Potion",
+                    description: "Restores 30 health points.",
+                    type: "consumable",
+                    effect: { health: 30 },
+                    value: 10
+                },
+                manaPotion: {
+                    id: "manaPotion",
+                    name: "Mana Potion",
+                    description: "Restores 20 mana points.",
+                    type: "consumable",
+                    effect: { mana: 20 },
+                    value: 15
+                },
+                woodenSword: {
+                    id: "woodenSword",
+                    name: "Wooden Sword",
+                    description: "A basic training sword. +2 Strength.",
+                    type: "weapon",
+                    slot: "weapon",
+                    effect: { strength: 2 },
+                    value: 5
+                },
+                ironSword: {
+                    id: "ironSword",
+                    name: "Iron Sword",
+                    description: "A sturdy iron sword. +5 Strength.",
+                    type: "weapon",
+                    slot: "weapon",
+                    effect: { strength: 5 },
+                    value: 25
+                },
+                leatherArmor: {
+                    id: "leatherArmor",
+                    name: "Leather Armor",
+                    description: "Basic protective gear. +10 max Health.",
+                    type: "armor",
+                    slot: "armor",
+                    effect: { maxHealth: 10 },
+                    value: 20
+                }
+            },
+            skills: {
+                warrior: [
+                    { id: "powerStrike", name: "Power Strike", description: "A powerful attack that deals 150% damage.", manaCost: 10, cooldown: 2, type: "attack", damage: 1.5 },
+                    { id: "shieldBash", name: "Shield Bash", description: "Stun the enemy for one turn.", manaCost: 15, cooldown: 3, type: "stun", duration: 1 }
+                ],
+                mage: [
+                    { id: "fireball", name: "Fireball", description: "Launch a ball of fire dealing 175% damage.", manaCost: 15, cooldown: 2, type: "attack", damage: 1.75 },
+                    { id: "frostNova", name: "Frost Nova", description: "Freeze the enemy for one turn.", manaCost: 20, cooldown: 3, type: "stun", duration: 1 }
+                ],
+                ranger: [
+                    { id: "preciseShot", name: "Precise Shot", description: "A well-aimed shot dealing 125% damage.", manaCost: 10, cooldown: 1, type: "attack", damage: 1.25 },
+                    { id: "trap", name: "Trap", description: "Set a trap reducing enemy action points by 1.", manaCost: 15, cooldown: 3, type: "debuff", effect: { actionPoints: -1 } }
+                ],
+                rogue: [
+                    { id: "backstab", name: "Backstab", description: "A sneaky attack dealing 200% damage.", manaCost: 15, cooldown: 3, type: "attack", damage: 2 },
+                    { id: "smokeBomb", name: "Smoke Bomb", description: "Confuse the enemy, reducing their accuracy.", manaCost: 10, cooldown: 2, type: "debuff", effect: { accuracy: -0.25 } }
+                ]
+            },
+            enemies: {
+                wolf: {
+                    name: "Wolf",
+                    health: 30,
+                    damage: 5,
+                    actionPoints: 2,
+                    xpReward: 20,
+                    goldReward: [5, 10],
+                    loot: [
+                        { itemId: "healthPotion", chance: 0.3 }
+                    ]
+                },
+                bandit: {
+                    name: "Bandit",
+                    health: 40,
+                    damage: 8,
+                    actionPoints: 2,
+                    xpReward: 30,
+                    goldReward: [10, 20],
+                    loot: [
+                        { itemId: "healthPotion", chance: 0.2 },
+                        { itemId: "manaPotion", chance: 0.1 },
+                        { itemId: "woodenSword", chance: 0.05 }
+                    ]
+                },
+                goblin: {
+                    name: "Goblin",
+                    health: 25,
+                    damage: 6,
+                    actionPoints: 3,
+                    xpReward: 25,
+                    goldReward: [8, 15],
+                    loot: [
+                        { itemId: "healthPotion", chance: 0.2 },
+                        { itemId: "leatherArmor", chance: 0.05 }
+                    ]
+                },
+                troll: {
+                    name: "Troll",
+                    health: 80,
+                    damage: 12,
+                    actionPoints: 1,
+                    xpReward: 50,
+                    goldReward: [15, 30],
+                    loot: [
+                        { itemId: "healthPotion", chance: 0.4 },
+                        { itemId: "ironSword", chance: 0.2 }
+                    ]
+                }
+            },
+            locations: {
+                crossroads: {
+                    name: "Crossroads",
+                    description: "You stand at a crossroads where several paths meet. The well-worn trails lead in different directions, each offering its own adventure.",
+                    choices: [
+                        { text: "Follow the path to the village", goTo: "village" },
+                        { text: "Enter the dark forest", goTo: "darkForest" },
+                        { text: "Climb the hill to the ancient ruins", goTo: "ancientRuins" },
+                        { text: "Take the road to the mountain pass", goTo: "mountainPass" }
+                    ]
+                },
+                village: {
+                    name: "Fallbrook Village",
+                    description: "A quaint village with thatched-roof cottages and friendly inhabitants. The village square is bustling with activity as merchants peddle their wares and children play.",
+                    choices: [
+                        { text: "Visit the blacksmith", goTo: "blacksmith" },
+                        { text: "Talk to the village elder", goTo: "villageElder" },
+                        { text: "Stop by the tavern", goTo: "tavern" },
+                        { text: "Return to the crossroads", goTo: "crossroads" }
+                    ]
+                },
+                darkForest: {
+                    name: "The Dark Forest",
+                    description: "Tall trees block out most of the sunlight, casting the forest in perpetual twilight. Strange sounds echo from deep within, and you feel eyes watching you from the shadows.",
+                    choices: [
+                        { text: "Follow the narrow path deeper", goTo: "deepForest" },
+                        { text: "Investigate the strange sounds", goTo: "forestEncounter", onSelect: () => startCombat("wolf") },
+                        { text: "Look for herbs and materials", goTo: "forestGathering" },
+                        { text: "Return to the crossroads", goTo: "crossroads" }
+                    ]
+                },
+                ancientRuins: {
+                    name: "Ancient Ruins",
+                    description: "Crumbling stone structures stand as reminders of a once-great civilization. Ornate carvings adorn the weathered columns, telling stories of forgotten heroes and ancient magic.",
+                    choices: [
+                        { text: "Explore the central temple", goTo: "centralTemple" },
+                        { text: "Search for hidden treasures", goTo: "ruinsTreasure" },
+                        { text: "Decipher the wall inscriptions", goTo: "ruinsInscriptions" },
+                        { text: "Return to the crossroads", goTo: "crossroads" }
+                    ]
+                },
+                mountainPass: {
+                    name: "Mountain Pass",
+                    description: "A narrow path winds between towering peaks. The thin mountain air fills your lungs as you gaze at the breathtaking view of the valley below.",
+                    choices: [
+                        { text: "Continue up the mountain", goTo: "mountainTop" },
+                        { text: "Explore a cave entrance", goTo: "mountainCave" },
+                        { text: "Approach the mountain hermit's hut", goTo: "hermitHut" },
+                        { text: "Return to the crossroads", goTo: "crossroads" }
+                    ]
+                },
+                blacksmith: {
+                    name: "Village Blacksmith",
+                    description: "The heat from the forge makes the air shimmer. The blacksmith, a burly man with a thick beard, hammers away at a glowing piece of metal. Weapons and armor of various qualities line the walls.",
+                    choices: [
+                        { text: "Browse weapons", goTo: "blacksmithWeapons" },
+                        { text: "Browse armor", goTo: "blacksmithArmor" },
+                        { text: "Ask about work", goTo: "blacksmithQuest" },
+                        { text: "Return to the village", goTo: "village" }
+                    ]
+                },
+                forestEncounter: {
+                    name: "Forest Clearing",
+                    description: "You enter a small clearing in the forest. Suddenly, a wolf emerges from the undergrowth, its yellow eyes fixed on you and teeth bared in a snarl.",
+                    choices: [
+                        { text: "Return to the forest", goTo: "darkForest" }
+                    ]
+                },
+                deepForest: {
+                    name: "Deep Forest",
+                    description: "The forest grows darker and more ancient as you venture deeper. Moss-covered trees tower overhead, and the undergrowth thickens. The air feels heavy with mystical energy.",
+                    choices: [
+                        { text: "Continue to the heart of the forest", goTo: "forestHeart" },
+                        { text: "Search for the source of the mystical energy", goTo: "magicGrove" },
+                        { text: "Look for forest creatures", goTo: "forestCreatures", onSelect: () => startCombat("goblin") },
+                        { text: "Return to the edge of the forest", goTo: "darkForest" }
+                    ]
+                },
+                tavern: {
+                    name: "The Drunken Dragon Tavern",
+                    description: "The tavern is warm and inviting, filled with the sound of laughter and clinking mugs. A bard plays a lively tune in the corner, and the air is thick with the aroma of hearty stew.",
+                    choices: [
+                        { text: "Talk to the bartender", goTo: "tavernBartender" },
+                        { text: "Listen to rumors", goTo: "tavernRumors" },
+                        { text: "Join a game of cards", goTo: "tavernCards" },
+                        { text: "Return to the village", goTo: "village" }
+                    ]
+                }
+                // More locations would be defined here in a real game
+            }
+        };
+
+        // Game UI references
+        const ui = {
+            screens: {
+                start: document.getElementById('start-screen'),
+                characterCreation: document.getElementById('character-creation'),
+                game: document.getElementById('game-screen'),
+                inventory: document.getElementById('inventory-screen')
+            },
+            buttons: {
+                newGame: document.getElementById('new-game'),
+                loadGame: document.getElementById('load-game'),
+                saveGame: document.getElementById('saveGame'),
+                inventory: document.getElementById('inventory-button'),
+                closeInventory: document.getElementById('close-inventory'),
+                useItem: document.getElementById('use-item'),
+                equipItem: document.getElementById('equip-item'),
+                dropItem: document.getElementById('drop-item')
+            },
+            character: {
+                form: document.getElementById('character-form'),
+                nameInput: document.getElementById('char-name'),
+                raceOptions: document.querySelectorAll('.race-option'),
+                classOptions: document.querySelectorAll('.class-option'),
+                background: document.getElementById('char-background'),
+                preview: {
+                    avatar: document.getElementById('character-avatar'),
+                    health: document.getElementById('preview-health'),
+                    mana: document.getElementById('preview-mana'),
+                    strength: document.getElementById('preview-strength'),
+                    intelligence: document.getElementById('preview-intelligence'),
+                    dexterity: document.getElementById('preview-dexterity'),
+                    charisma: document.getElementById('preview-charisma')
+                },
+                game: {
+                    avatar: document.getElementById('game-character-avatar'),
+                    name: document.getElementById('game-character-name'),
+                    details: document.getElementById('game-character-details'),
+                    health: document.getElementById('health-display'),
+                    healthBar: document.getElementById('health-bar'),
+                    mana: document.getElementById('mana-display'),
+                    manaBar: document.getElementById('mana-bar'),
+                    xp: document.getElementById('xp-display'),
+                    xpBar: document.getElementById('xp-bar'),
+                    strength: document.getElementById('game-strength'),
+                    intelligence: document.getElementById('game-intelligence'),
+                    dexterity: document.getElementById('game-dexterity'),
+                    charisma: document.getElementById('game-charisma')
+                }
+            },
+            game: {
+                locationName: document.getElementById('location-name'),
+                storyText: document.getElementById('story-text'),
+                choiceContainer: document.getElementById('choice-container'),
+                gold: document.getElementById('gold-display'),
+                inventoryCount: document.getElementById('inventory-count'),
+                inventoryMax: document.getElementById('inventory-max'),
+                inventoryGrid: document.getElementById('inventory-grid'),
+                itemDetails: document.getElementById('item-details'),
+                itemName: document.getElementById('item-name'),
+                itemDescription: document.getElementById('item-description')
+            },
+            combat: {
+                container: document.getElementById('combat-container'),
+                enemyName: document.getElementById('enemy-name'),
+                enemyHealth: document.getElementById('enemy-health-display'),
+                enemyHealthBar: document.getElementById('enemy-health-bar'),
+                log: document.getElementById('combat-log'),
+                actions: document.getElementById('combat-actions'),
+                skillButtons: document.getElementById('skill-buttons'),
+                itemButtons: document.getElementById('item-buttons')
+            },
+            modal: {
+                container: document.getElementById('modal'),
+                title: document.getElementById('modal-title'),
+                content: document.getElementById('modal-content'),
+                confirm: document.getElementById('modal-confirm'),
+                cancel: document.getElementById('modal-cancel')
+            }
+        };
+
+        // Game initialization
+        function initGame() {
+            // Button event listeners
+            ui.buttons.newGame.addEventListener('click', startNewGame);
+            ui.buttons.loadGame.addEventListener('click', loadGame);
+            ui.buttons.saveGame.addEventListener('click', saveGame);
+            ui.buttons.inventory.addEventListener('click', openInventory);
+            ui.buttons.closeInventory.addEventListener('click', closeInventory);
+            ui.buttons.useItem.addEventListener('click', useSelectedItem);
+            ui.buttons.equipItem.addEventListener('click', equipSelectedItem);
+            ui.buttons.dropItem.addEventListener('click', dropSelectedItem);
+            
+            // Character creation form
+            ui.character.form.addEventListener('submit', createCharacter);
+            
+            // Race and class selection UI updates
+            ui.character.raceOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    ui.character.raceOptions.forEach(o => o.classList.remove('border-primary', 'dark:border-primary-dark'));
+                    option.classList.add('border-primary', 'dark:border-primary-dark');
+                    const radio = option.querySelector('input[type="radio"]');
+                    radio.checked = true;
+                    updateCharacterPreview();
+                });
+            });
+            
+            ui.character.classOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    ui.character.classOptions.forEach(o => o.classList.remove('border-primary', 'dark:border-primary-dark'));
+                    option.classList.add('border-primary', 'dark:border-primary-dark');
+                    const radio = option.querySelector('input[type="radio"]');
+                    radio.checked = true;
+                    updateCharacterPreview();
+                });
+            });
+            
+            ui.character.background.addEventListener('change', updateCharacterPreview);
+            
+            // Initial preview update
+            updateCharacterPreview();
+            
+            // Combat action buttons
+            document.querySelectorAll('.combat-action').forEach(button => {
+                button.addEventListener('click', () => handleCombatAction(button.dataset.action));
+            });
+            
+            // Check for saved game
+            checkSavedGame();
+        }
+
+        // Start new game
+        function startNewGame() {
+            showScreen('characterCreation');
+        }
+
+        // Load game from save
+        function loadGame() {
+            try {
+                const savedGame = localStorage.getItem('eldoriaSave');
+                if (savedGame) {
+                    const saveData = JSON.parse(savedGame);
+                    Object.assign(gameState, saveData);
+                    
+                    // Restore Set object for visited locations
+                    if (Array.isArray(gameState.visitedLocations)) {
+                        gameState.visitedLocations = new Set(gameState.visitedLocations);
+                    }
+                    
+                    updateCharacterUI();
+                    showScreen('game');
+                    goToLocation(gameState.currentLocation);
+                    showModal('Game Loaded', 'Your adventure continues...', 'Continue', null, () => {});
+                } else {
+                    showModal('No Saved Game', 'No saved game found. Start a new adventure!', 'New Game', 'Cancel', 
+                        () => startNewGame());
+                }
+            } catch (error) {
+                console.error("Error loading saved game:", error);
+                showModal('Error', 'There was a problem loading your saved game.', 'New Game', 'Cancel',
+                    () => startNewGame());
+            }
+        }
+
+        // Save game
+        function saveGame() {
+            try {
+                // Convert Set to Array for storage
+                const saveData = { ...gameState };
+                saveData.visitedLocations = Array.from(gameState.visitedLocations);
+                
+                localStorage.setItem('eldoriaSave', JSON.stringify(saveData));
+                showModal('Game Saved', 'Your adventure has been saved!', 'Continue', null, () => {});
+            } catch (error) {
+                console.error("Error saving game:", error);
+                showModal('Error', 'There was a problem saving your game.', 'OK', null, () => {});
+            }
+        }
+
+        // Check if a saved game exists
+        function checkSavedGame() {
+            const savedGame = localStorage.getItem('eldoriaSave');
+            if (savedGame) {
+                ui.buttons.loadGame.disabled = false;
+                ui.buttons.loadGame.classList.remove('opacity-50');
+            } else {
+                ui.buttons.loadGame.disabled = true;
+                ui.buttons.loadGame.classList.add('opacity-50');
+            }
+        }
+
+        // Character creation logic
+        function createCharacter(event) {
+            event.preventDefault();
+            
+            const name = ui.character.nameInput.value.trim();
+            const race = document.querySelector('input[name="race"]:checked').value;
+            const characterClass = document.querySelector('input[name="class"]:checked').value;
+            const background = ui.character.background.value;
+            
+            if (!name) {
+                showModal('Missing Name', 'Please enter a name for your character.', 'OK', null, () => {});
+                return;
+            }
+            
+            // Initialize character
+            gameState.character.name = name;
+            gameState.character.race = race;
+            gameState.character.class = characterClass;
+            gameState.character.background = background;
+            
+            // Set base stats
+            gameState.character.stats = {
+                strength: 10,
+                intelligence: 10,
+                dexterity: 10,
+                charisma: 10
+            };
+            
+            // Apply race bonuses
+            switch (race) {
+                case 'human':
+                    gameState.character.stats.strength += 2;
+                    gameState.character.stats.intelligence += 2;
+                    gameState.character.stats.dexterity += 2;
+                    gameState.character.stats.charisma += 2;
+                    break;
+                case 'elf':
+                    gameState.character.stats.dexterity += 3;
+                    gameState.character.stats.intelligence += 3;
+                    break;
+                case 'dwarf':
+                    gameState.character.stats.strength += 4;
+                    break;
+                case 'orc':
+                    gameState.character.stats.strength += 6;
+                    gameState.character.stats.intelligence -= 1;
+                    break;
+            }
+            
+            // Apply class bonuses
+            switch (characterClass) {
+                case 'warrior':
+                    gameState.character.maxHealth = 100;
+                    gameState.character.maxMana = 50;
+                    gameState.character.stats.strength += 3;
+                    break;
+                case 'mage':
+                    gameState.character.maxHealth = 80;
+                    gameState.character.maxMana = 100;
+                    gameState.character.stats.intelligence += 3;
+                    break;
+                case 'ranger':
+                    gameState.character.maxHealth = 90;
+                    gameState.character.maxMana = 70;
+                    gameState.character.stats.dexterity += 3;
+                    break;
+                case 'rogue':
+                    gameState.character.maxHealth = 85;
+                    gameState.character.maxMana = 60;
+                    gameState.character.stats.dexterity += 2;
+                    gameState.character.stats.charisma += 3;
+                    break;
+            }
+            
+            // Apply background effects
+            switch (background) {
+                case 'noble':
+                    gameState.character.stats.charisma += 2;
+                    gameState.character.stats.strength -= 1;
+                    gameState.character.gold = 50;
+                    break;
+                case 'soldier':
+                    gameState.character.stats.strength += 2;
+                    gameState.character.stats.charisma -= 1;
+                    gameState.character.gold = 20;
+                    break;
+                case 'scholar':
+                    gameState.character.stats.intelligence += 2;
+                    gameState.character.stats.strength -= 1;
+                    gameState.character.gold = 30;
+                    break;
+                case 'outlaw':
+                    gameState.character.stats.dexterity += 2;
+                    gameState.character.stats.charisma -= 1;
+                    gameState.character.gold = 40;
+                    break;
+            }
+            
+            // Adjust for dwarf racial health bonus
+            if (race === 'dwarf') {
+                gameState.character.maxHealth += 20;
+            }
+            
+            // Set current health/mana to max
+            gameState.character.health = gameState.character.maxHealth;
+            gameState.character.mana = gameState.character.maxMana;
+            
+            // Add starting gear based on class
+            switch (characterClass) {
+                case 'warrior':
+                    addItemToInventory(gameData.items.woodenSword);
+                    break;
+                case 'mage':
+                    addItemToInventory(gameData.items.manaPotion);
+                    break;
+                case 'ranger':
+                case 'rogue':
+                    addItemToInventory(gameData.items.healthPotion);
+                    break;
+            }
+            
+            // Add class skills
+            gameState.character.skills = gameData.skills[characterClass].map(skill => ({...skill}));
+            
+            // Update UI and start game
+            updateCharacterUI();
+            showScreen('game');
+            
+            // Start at the crossroads
+            goToLocation('crossroads');
+            
+            // Welcome message
+            showModal('Your Journey Begins', 
+                `Welcome, ${name}! Your adventure in the realm of Eldoria begins now. Your choices will shape your destiny and the fate of the world.`, 
+                'Begin', null, () => {});
+        }
+
+        // Update character preview during creation
+        function updateCharacterPreview() {
+            const race = document.querySelector('input[name="race"]:checked').value;
+            const characterClass = document.querySelector('input[name="class"]:checked').value;
+            const background = ui.character.background.value;
+            
+            // Calculate base stats
+            let stats = {
+                strength: 10,
+                intelligence: 10,
+                dexterity: 10,
+                charisma: 10,
+                health: 0,
+                mana: 0
+            };
+            
+            // Apply race modifiers
+            switch (race) {
+                case 'human':
+                    stats.strength += 2;
+                    stats.intelligence += 2;
+                    stats.dexterity += 2;
+                    stats.charisma += 2;
+                    break;
+                case 'elf':
+                    stats.dexterity += 3;
+                    stats.intelligence += 3;
+                    break;
+                case 'dwarf':
+                    stats.strength += 4;
+                    stats.health += 20;
+                    break;
+                case 'orc':
+                    stats.strength += 6;
+                    stats.intelligence -= 1;
+                    break;
+            }
+            
+            // Apply class modifiers
+            switch (characterClass) {
+                case 'warrior':
+                    stats.health = 100;
+                    stats.mana = 50;
+                    stats.strength += 3;
+                    break;
+                case 'mage':
+                    stats.health = 80;
+                    stats.mana = 100;
+                    stats.intelligence += 3;
+                    break;
+                case 'ranger':
+                    stats.health = 90;
+                    stats.mana = 70;
+                    stats.dexterity += 3;
+                    break;
+                case 'rogue':
+                    stats.health = 85;
+                    stats.mana = 60;
+                    stats.dexterity += 2;
+                    stats.charisma += 3;
+                    break;
+            }
+            
+            // Apply background effects
+            switch (background) {
+                case 'noble':
+                    stats.charisma += 2;
+                    stats.strength -= 1;
+                    break;
+                case 'soldier':
+                    stats.strength += 2;
+                    stats.charisma -= 1;
+                    break;
+                case 'scholar':
+                    stats.intelligence += 2;
+                    stats.strength -= 1;
+                    break;
+                case 'outlaw':
+                    stats.dexterity += 2;
+                    stats.charisma -= 1;
+                    break;
+            }
+            
+            // Update UI
+            ui.character.preview.health.textContent = stats.health;
+            ui.character.preview.mana.textContent = stats.mana;
+            ui.character.preview.strength.textContent = stats.strength;
+            ui.character.preview.intelligence.textContent = stats.intelligence;
+            ui.character.preview.dexterity.textContent = stats.dexterity;
+            ui.character.preview.charisma.textContent = stats.charisma;
+            
+            // Update avatar based on race/class combination
+            const avatarColors = {
+                'human-warrior': '#8B0000',  // Dark Red
+                'human-mage': '#4B0082',     // Indigo
+                'human-ranger': '#006400',   // Dark Green
+                'human-rogue': '#2F4F4F',    // Dark Slate Gray
+                'elf-warrior': '#9932CC',    // Dark Orchid
+                'elf-mage': '#4169E1',       // Royal Blue
+                'elf-ranger': '#228B22',     // Forest Green
+                'elf-rogue': '#483D8B',      // Dark Slate Blue
+                'dwarf-warrior': '#B8860B',  // Dark Goldenrod
+                'dwarf-mage': '#800000',     // Maroon
+                'dwarf-ranger': '#556B2F',   // Dark Olive Green
+                'dwarf-rogue': '#8B4513',    // Saddle Brown
+                'orc-warrior': '#A52A2A',    // Brown
+                'orc-mage': '#191970',       // Midnight Blue
+                'orc-ranger': '#006400',     // Dark Green
+                'orc-rogue': '#2F4F4F'       // Dark Slate Gray
+            };
+            
+            const avatarColor = avatarColors[`${race}-${characterClass}`] || '#5D5CDE';
+            ui.character.preview.avatar.style.backgroundColor = avatarColor;
+            ui.character.preview.avatar.textContent = characterClass.charAt(0).toUpperCase();
+        }
+
+        // Update character UI in game screen
+        function updateCharacterUI() {
+            const character = gameState.character;
+            
+            // Update stats display
+            ui.character.game.name.textContent = character.name;
+            ui.character.game.details.textContent = `${capitalize(character.race)} ${capitalize(character.class)}`;
+            ui.character.game.strength.textContent = character.stats.strength;
+            ui.character.game.intelligence.textContent = character.stats.intelligence;
+            ui.character.game.dexterity.textContent = character.stats.dexterity;
+            ui.character.game.charisma.textContent = character.stats.charisma;
+            
+            // Update health/mana/xp
+            ui.character.game.health.textContent = `${character.health}/${character.maxHealth}`;
+            ui.character.game.healthBar.style.width = `${(character.health / character.maxHealth) * 100}%`;
+            
+            ui.character.game.mana.textContent = `${character.mana}/${character.maxMana}`;
+            ui.character.game.manaBar.style.width = `${(character.mana / character.maxMana) * 100}%`;
+            
+            ui.character.game.xp.textContent = `${character.xp}/${character.nextLevelXp}`;
+            ui.character.game.xpBar.style.width = `${(character.xp / character.nextLevelXp) * 100}%`;
+            
+            // Update avatar
+            ui.character.game.avatar.style.backgroundColor = character.avatarColor;
+            ui.character.game.avatar.textContent = character.name.charAt(0).toUpperCase();
+            
+            // Update inventory/gold in inventory screen
+            ui.game.gold.textContent = character.gold;
+            ui.game.inventoryCount.textContent = character.inventory.length;
+            ui.game.inventoryMax.textContent = 20; // Inventory max size
+        }
+
+        // Navigate to a location
+        function goToLocation(locationId) {
+            // Add to visited locations
+            gameState.visitedLocations.add(locationId);
+            
+            // Update current location
+            gameState.currentLocation = locationId;
+            
+            // Get location data
+            const location = gameData.locations[locationId];
+            if (!location) {
+                console.error(`Location not found: ${locationId}`);
+                return;
+            }
+            
+            // Update UI
+            ui.game.locationName.textContent = location.name;
+            ui.game.storyText.innerHTML = marked.parse(location.description);
+            
+            // Clear and create choice buttons
+            ui.game.choiceContainer.innerHTML = '';
+            
+            if (location.choices) {
+                location.choices.forEach(choice => {
+                    const button = document.createElement('button');
+                    button.textContent = choice.text;
+                    button.className = 'w-full py-2 px-4 mb-2 bg-primary hover:bg-primary-light text-white rounded transition-colors';
+                    
+                    button.addEventListener('click', () => {
+                        if (choice.onSelect) {
+                            choice.onSelect();
+                        }
+                        
+                        if (choice.goTo) {
+                            goToLocation(choice.goTo);
+                        }
+                    });
+                    
+                    ui.game.choiceContainer.appendChild(button);
+                });
+            }
+        }
+
+        // Start combat with an enemy
+        function startCombat(enemyId) {
+            const enemy = gameData.enemies[enemyId];
+            if (!enemy) {
+                console.error(`Enemy not found: ${enemyId}`);
+                return;
+            }
+            
+            // Initialize combat
+            gameState.combat.inCombat = true;
+            gameState.combat.enemy = {
+                name: enemy.name,
+                health: enemy.health,
+                maxHealth: enemy.health,
+                damage: enemy.damage,
+                actionPoints: enemy.actionPoints,
+                maxActionPoints: enemy.actionPoints,
+                xpReward: enemy.xpReward,
+                goldReward: enemy.goldReward,
+                loot: enemy.loot
+            };
+            
+            gameState.combat.turn = 1;
+            gameState.combat.playerActionPoints = 3;
+            gameState.combat.log = [`Combat begins! You face a ${enemy.name}!`];
+            
+            // Show combat UI
+            ui.combat.container.classList.remove('hidden');
+            ui.combat.actions.classList.remove('hidden');
+            ui.game.choiceContainer.classList.add('hidden');
+            
+            // Update enemy display
+            ui.combat.enemyName.textContent = enemy.name;
+            ui.combat.enemyHealth.textContent = `${enemy.health}/${enemy.health}`;
+            ui.combat.enemyHealthBar.style.width = '100%';
+            
+            // Update combat log
+            updateCombatLog();
+        }
+
+        // Handle combat action
+        function handleCombatAction(action) {
+            if (!gameState.combat.inCombat) return;
+            
+            // Hide sub-menus
+            ui.combat.skillButtons.classList.add('hidden');
+            ui.combat.itemButtons.classList.add('hidden');
+            
+            switch (action) {
+                case 'attack':
+                    performAttack();
+                    break;
+                case 'skill':
+                    showSkillButtons();
+                    break;
+                case 'item':
+                    showItemButtons();
+                    break;
+                case 'defend':
+                    performDefend();
+                    break;
+                case 'flee':
+                    attemptFlee();
+                    break;
+            }
+        }
+
+        // Perform basic attack
+        function performAttack() {
+            if (gameState.combat.playerActionPoints < 1) {
+                addCombatLog("You don't have enough action points!");
+                return;
+            }
+            
+            // Calculate damage based on strength
+            const damageBase = 5 + Math.floor(gameState.character.stats.strength / 5);
+            const damage = damageBase + Math.floor(Math.random() * 3);
+            
+            // Apply damage to enemy
+            gameState.combat.enemy.health -= damage;
+            if (gameState.combat.enemy.health < 0) gameState.combat.enemy.health = 0;
+            
+            // Update UI
+            ui.combat.enemyHealth.textContent = `${gameState.combat.enemy.health}/${gameState.combat.enemy.maxHealth}`;
+            ui.combat.enemyHealthBar.style.width = `${(gameState.combat.enemy.health / gameState.combat.enemy.maxHealth) * 100}%`;
+            
+            // Use action point
+            gameState.combat.playerActionPoints--;
+            
+            // Add to combat log
+            addCombatLog(`You attack the ${gameState.combat.enemy.name} for ${damage} damage!`);
+            
+            // Check if enemy is defeated
+            if (gameState.combat.enemy.health <= 0) {
+                endCombat(true);
+                return;
+            }
+            
+            // If out of action points, it's enemy turn
+            if (gameState.combat.playerActionPoints <= 0) {
+                enemyTurn();
+            }
+        }
+
+        // Show skill buttons
+        function showSkillButtons() {
+            ui.combat.skillButtons.innerHTML = '';
+            ui.combat.skillButtons.classList.remove('hidden');
+            
+            // Create buttons for each skill
+            gameState.character.skills.forEach(skill => {
+                const button = document.createElement('button');
+                button.textContent = `${skill.name} (${skill.manaCost} MP)`;
+                button.className = 'py-1 px-3 text-sm bg-blue-600 hover:bg-blue-500 text-white rounded transition-colors';
+                
+                if (gameState.character.mana < skill.manaCost) {
+                    button.classList.add('opacity-50');
+                    button.disabled = true;
+                }
+                
+                button.addEventListener('click', () => useSkill(skill));
+                
+                ui.combat.skillButtons.appendChild(button);
+            });
+        }
+
+        // Show item buttons
+        function showItemButtons() {
+            ui.combat.itemButtons.innerHTML = '';
+            ui.combat.itemButtons.classList.remove('hidden');
+            
+            // Filter consumable items
+            const consumables = gameState.character.inventory.filter(item => 
+                gameData.items[item.id] && gameData.items[item.id].type === 'consumable');
+            
+            if (consumables.length === 0) {
+                const message = document.createElement('div');
+                message.textContent = 'No usable items!';
+                message.className = 'text-sm text-gray-500 dark:text-gray-400';
+                ui.combat.itemButtons.appendChild(message);
+                return;
+            }
+            
+            // Create buttons for each consumable
+            consumables.forEach(item => {
+                const itemData = gameData.items[item.id];
+                const button = document.createElement('button');
+                button.textContent = itemData.name;
+                button.className = 'py-1 px-3 text-sm bg-green-600 hover:bg-green-500 text-white rounded transition-colors';
+                
+                button.addEventListener('click', () => useCombatItem(item.id));
+                
+                ui.combat.itemButtons.appendChild(button);
+            });
+        }
+
+        // Use a skill in combat
+        function useSkill(skill) {
+            if (gameState.combat.playerActionPoints < 1) {
+                addCombatLog("You don't have enough action points!");
+                return;
+            }
+            
+            if (gameState.character.mana < skill.manaCost) {
+                addCombatLog("You don't have enough mana!");
+                return;
+            }
+            
+            // Use mana and action point
+            gameState.character.mana -= skill.manaCost;
+            gameState.combat.playerActionPoints--;
+            
+            // Update mana display
+            ui.character.game.mana.textContent = `${gameState.character.mana}/${gameState.character.maxMana}`;
+            ui.character.game.manaBar.style.width = `${(gameState.character.mana / gameState.character.maxMana) * 100}%`;
+            
+            // Skill effects based on type
+            switch (skill.type) {
+                case 'attack':
+                    // Calculate damage based on skill modifier and character stats
+                    const baseDamage = 5 + Math.floor(gameState.character.stats.strength / 5);
+                    const damage = Math.floor(baseDamage * skill.damage);
+                    
+                    // Apply damage to enemy
+                    gameState.combat.enemy.health -= damage;
+                    if (gameState.combat.enemy.health < 0) gameState.combat.enemy.health = 0;
+                    
+                    // Update UI
+                    ui.combat.enemyHealth.textContent = `${gameState.combat.enemy.health}/${gameState.combat.enemy.maxHealth}`;
+                    ui.combat.enemyHealthBar.style.width = `${(gameState.combat.enemy.health / gameState.combat.enemy.maxHealth) * 100}%`;
+                    
+                    // Add to combat log
+                    addCombatLog(`You use ${skill.name} and deal ${damage} damage to the ${gameState.combat.enemy.name}!`);
+                    
+                    // Check if enemy is defeated
+                    if (gameState.combat.enemy.health <= 0) {
+                        endCombat(true);
+                        return;
+                    }
+                    break;
+                    
+                case 'stun':
+                    // Stun the enemy
+                    gameState.combat.enemy.stunned = skill.duration;
+                    
+                    // Add to combat log
+                    addCombatLog(`You use ${skill.name} and stun the ${gameState.combat.enemy.name} for ${skill.duration} turn(s)!`);
+                    break;
+                    
+                case 'debuff':
+                    // Apply debuff to enemy
+                    Object.entries(skill.effect).forEach(([stat, value]) => {
+                        if (stat === 'actionPoints') {
+                            gameState.combat.enemy.actionPoints += value;
+                            if (gameState.combat.enemy.actionPoints < 1) gameState.combat.enemy.actionPoints = 1;
+                        }
+                    });
+                    
+                    // Add to combat log
+                    addCombatLog(`You use ${skill.name} on the ${gameState.combat.enemy.name}!`);
+                    break;
+            }
+            
+            // Hide skill buttons
+            ui.combat.skillButtons.classList.add('hidden');
+            
+            // If out of action points, it's enemy turn
+            if (gameState.combat.playerActionPoints <= 0) {
+                enemyTurn();
+            }
+        }
+
+        // Use item in combat
+        function useCombatItem(itemId) {
+            // Find item in inventory
+            const itemIndex = gameState.character.inventory.findIndex(item => item.id === itemId);
+            if (itemIndex === -1) return;
+            
+            const itemData = gameData.items[itemId];
+            if (!itemData) return;
+            
+            // Apply item effects
+            if (itemData.effect) {
+                Object.entries(itemData.effect).forEach(([stat, value]) => {
+                    if (stat === 'health') {
+                        gameState.character.health += value;
+                        if (gameState.character.health > gameState.character.maxHealth) {
+                            gameState.character.health = gameState.character.maxHealth;
+                        }
+                        
+                        // Update health display
+                        ui.character.game.health.textContent = `${gameState.character.health}/${gameState.character.maxHealth}`;
+                        ui.character.game.healthBar.style.width = `${(gameState.character.health / gameState.character.maxHealth) * 100}%`;
+                    }
+                    
+                    if (stat === 'mana') {
+                        gameState.character.mana += value;
+                        if (gameState.character.mana > gameState.character.maxMana) {
+                            gameState.character.mana = gameState.character.maxMana;
+                        }
+                        
+                        // Update mana display
+                        ui.character.game.mana.textContent = `${gameState.character.mana}/${gameState.character.maxMana}`;
+                        ui.character.game.manaBar.style.width = `${(gameState.character.mana / gameState.character.maxMana) * 100}%`;
+                    }
+                });
+            }
+            
+            // Remove item from inventory
+            gameState.character.inventory.splice(itemIndex, 1);
+            
+            // Add to combat log
+            addCombatLog(`You used ${itemData.name}!`);
+            
+            // Hide item buttons
+            ui.combat.itemButtons.classList.add('hidden');
+            
+            // Enemy turn (using item doesn't cost action points)
+            enemyTurn();
+        }
+
+        // Perform defend action
+        function performDefend() {
+            if (gameState.combat.playerActionPoints < 1) {
+                addCombatLog("You don't have enough action points!");
+                return;
+            }
+            
+            // Apply defense status
+            gameState.combat.playerDefending = true;
+            
+            // Use action point
+            gameState.combat.playerActionPoints--;
+            
+            // Add to combat log
+            addCombatLog('You take a defensive stance, reducing incoming damage!');
+            
+            // If out of action points, it's enemy turn
+            if (gameState.combat.playerActionPoints <= 0) {
+                enemyTurn();
+            }
+        }
+
+        // Attempt to flee from combat
+        function attemptFlee() {
+            // 50% chance to flee, modified by dexterity
+            const fleeChance = 0.5 + (gameState.character.stats.dexterity / 100);
+            
+            if (Math.random() < fleeChance) {
+                // Successful flee
+                addCombatLog('You successfully flee from combat!');
+                setTimeout(() => {
+                    endCombat(false);
+                    goToLocation(gameState.currentLocation);
+                }, 1000);
+            } else {
+                // Failed flee attempt
+                addCombatLog('You failed to flee!');
+                
+                // Immediately trigger enemy turn
+                enemyTurn();
+            }
+        }
+
+        // Enemy turn in combat
+        function enemyTurn() {
+            // Check if enemy is stunned
+            if (gameState.combat.enemy.stunned > 0) {
+                addCombatLog(`The ${gameState.combat.enemy.name} is stunned and cannot act!`);
+                gameState.combat.enemy.stunned--;
+                startNewTurn();
+                return;
+            }
+            
+            // Enemy attacks
+            let damage = gameState.combat.enemy.damage + Math.floor(Math.random() * 3);
+            
+            // Reduce damage if player is defending
+            if (gameState.combat.playerDefending) {
+                damage = Math.floor(damage / 2);
+                addCombatLog(`The ${gameState.combat.enemy.name} attacks! Your defensive stance reduces the damage to ${damage}!`);
+                gameState.combat.playerDefending = false;
+            } else {
+                addCombatLog(`The ${gameState.combat.enemy.name} attacks for ${damage} damage!`);
+            }
+            
+            // Apply damage to player
+            gameState.character.health -= damage;
+            if (gameState.character.health < 0) gameState.character.health = 0;
+            
+            // Update health display
+            ui.character.game.health.textContent = `${gameState.character.health}/${gameState.character.maxHealth}`;
+            ui.character.game.healthBar.style.width = `${(gameState.character.health / gameState.character.maxHealth) * 100}%`;
+            
+            // Check if player is defeated
+            if (gameState.character.health <= 0) {
+                playerDefeated();
+                return;
+            }
+            
+            // Start new turn
+            startNewTurn();
+        }
+
+        // Start a new combat turn
+        function startNewTurn() {
+            gameState.combat.turn++;
+            gameState.combat.playerActionPoints = 3;
+            addCombatLog(`------ Turn ${gameState.combat.turn} ------`);
+        }
+
+        // End combat
+        function endCombat(victory) {
+            // Hide combat UI
+            ui.combat.container.classList.add('hidden');
+            ui.combat.actions.classList.add('hidden');
+            ui.game.choiceContainer.classList.remove('hidden');
+            
+            // Clear combat state
+            gameState.combat.inCombat = false;
+            
+            if (victory) {
+                // Calculate rewards
+                const xpReward = gameState.combat.enemy.xpReward;
+                const goldReward = Math.floor(Math.random() * 
+                    (gameState.combat.enemy.goldReward[1] - gameState.combat.enemy.goldReward[0] + 1)) + 
+                    gameState.combat.enemy.goldReward[0];
+                
+                // Apply rewards
+                gameState.character.xp += xpReward;
+                gameState.character.gold += goldReward;
+                
+                // Check for level up
+                checkLevelUp();
+                
+                // Update UI
+                ui.character.game.xp.textContent = `${gameState.character.xp}/${gameState.character.nextLevelXp}`;
+                ui.character.game.xpBar.style.width = `${(gameState.character.xp / gameState.character.nextLevelXp) * 100}%`;
+                
+                // Check for loot drops
+                const lootItems = [];
+                gameState.combat.enemy.loot.forEach(lootEntry => {
+                    if (Math.random() < lootEntry.chance) {
+                        const item = gameData.items[lootEntry.itemId];
+                        if (item) {
+                            addItemToInventory(item);
+                            lootItems.push(item.name);
+                        }
+                    }
+                });
+                
+                // Construct victory message
+                let victoryMessage = `You defeated the ${gameState.combat.enemy.name}!<br>`;
+                victoryMessage += `You gained ${xpReward} XP and ${goldReward} gold.`;
+                
+                if (lootItems.length > 0) {
+                    victoryMessage += `<br>You found: ${lootItems.join(', ')}`;
+                }
+                
+                // Display victory message
+                showModal('Victory!', victoryMessage, 'Continue', null, () => {});
+            }
+        }
+
+        // Player defeated
+        function playerDefeated() {
+            // End combat
+            gameState.combat.inCombat = false;
+            
+            // Show defeat message
+            showModal('Defeated', 'You have been defeated in combat! You lose some gold and return to a safe location.', 'Continue', null, () => {
+                // Reduce gold
+                gameState.character.gold = Math.floor(gameState.character.gold * 0.8);
+                
+                // Restore some health
+                gameState.character.health = Math.floor(gameState.character.maxHealth * 0.5);
+                ui.character.game.health.textContent = `${gameState.character.health}/${gameState.character.maxHealth}`;
+                ui.character.game.healthBar.style.width = `${(gameState.character.health / gameState.character.maxHealth) * 100}%`;
+                
+                // Return to crossroads
+                goToLocation('crossroads');
+                
+                // Hide combat UI
+                ui.combat.container.classList.add('hidden');
+                ui.combat.actions.classList.add('hidden');
+                ui.game.choiceContainer.classList.remove('hidden');
+            });
+        }
+
+        // Check for level up
+        function checkLevelUp() {
+            if (gameState.character.xp >= gameState.character.nextLevelXp) {
+                // Level up
+                gameState.character.level++;
+                gameState.character.xp -= gameState.character.nextLevelXp;
+                gameState.character.nextLevelXp = Math.floor(gameState.character.nextLevelXp * 1.5);
+                
+                // Increase stats
+                gameState.character.maxHealth += 10;
+                gameState.character.health = gameState.character.maxHealth;
+                gameState.character.maxMana += 5;
+                gameState.character.mana = gameState.character.maxMana;
+                
+                // Stat increases based on class
+                switch (gameState.character.class) {
+                    case 'warrior':
+                        gameState.character.stats.strength += 2;
+                        gameState.character.stats.dexterity += 1;
+                        break;
+                    case 'mage':
+                        gameState.character.stats.intelligence += 2;
+                        gameState.character.stats.charisma += 1;
+                        break;
+                    case 'ranger':
+                        gameState.character.stats.dexterity += 2;
+                        gameState.character.stats.strength += 1;
+                        break;
+                    case 'rogue':
+                        gameState.character.stats.dexterity += 1;
+                        gameState.character.stats.charisma += 2;
+                        break;
+                }
+                
+                // Update UI
+                updateCharacterUI();
+                
+                // Show level up message
+                showModal('Level Up!', `Congratulations! You are now level ${gameState.character.level}!<br>Your stats have increased.`, 'Continue', null, () => {});
+                
+                // Check if there's more XP to process (multiple level ups)
+                checkLevelUp();
+            }
+        }
+
+        // Add item to inventory
+        function addItemToInventory(item) {
+            gameState.character.inventory.push({
+                id: item.id,
+                quantity: 1
+            });
+        }
+
+        // Update combat log
+        function updateCombatLog() {
+            ui.combat.log.innerHTML = gameState.combat.log.join('<br>');
+            ui.combat.log.scrollTop = ui.combat.log.scrollHeight;
+        }
+
+        // Add message to combat log
+        function addCombatLog(message) {
+            gameState.combat.log.push(message);
+            updateCombatLog();
+        }
+
+        // Inventory management
+        function openInventory() {
+            showScreen('inventory');
+            updateInventoryUI();
+        }
+
+        function closeInventory() {
+            showScreen('game');
+        }
+
+        function updateInventoryUI() {
+            // Update counts
+            ui.game.gold.textContent = gameState.character.gold;
+            ui.game.inventoryCount.textContent = gameState.character.inventory.length;
+            
+            // Clear grid
+            ui.game.inventoryGrid.innerHTML = '';
+            
+            // Create inventory slots
+            gameState.character.inventory.forEach((item, index) => {
+                const itemData = gameData.items[item.id];
+                if (!itemData) return;
+                
+                const slot = document.createElement('div');
+                slot.className = 'bg-background-light dark:bg-background-dark p-2 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors';
+                slot.innerHTML = `
+                    <div class="font-bold text-sm">${itemData.name}</div>
+                    <div class="text-xs">${itemData.type}</div>
+                `;
+                
+                slot.addEventListener('click', () => selectInventoryItem(index));
+                
+                ui.game.inventoryGrid.appendChild(slot);
+            });
+            
+            // Add empty slots up to max
+            const emptySlots = 20 - gameState.character.inventory.length;
+            for (let i = 0; i < emptySlots; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'bg-background-light dark:bg-background-dark p-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-700';
+                slot.innerHTML = `<div class="text-center text-gray-400 text-xs">Empty</div>`;
+                ui.game.inventoryGrid.appendChild(slot);
+            }
+            
+            // Update equipment slots
+            document.querySelectorAll('.equipment-slot').forEach(slot => {
+                const slotType = slot.dataset.slot;
+                const equippedItem = gameState.character.equipment[slotType];
+                
+                const itemElement = slot.querySelector('.equipment-item');
+                if (equippedItem) {
+                    const itemData = gameData.items[equippedItem.id];
+                    itemElement.textContent = itemData.name;
+                    itemElement.className = 'equipment-item text-sm';
+                } else {
+                    itemElement.textContent = 'Empty';
+                    itemElement.className = 'equipment-item text-sm text-gray-500 dark:text-gray-400';
+                }
+            });
+            
+            // Hide item details
+            ui.game.itemDetails.classList.add('hidden');
+        }
+
+        function selectInventoryItem(index) {
+            const item = gameState.character.inventory[index];
+            if (!item) return;
+            
+            const itemData = gameData.items[item.id];
+            if (!itemData) return;
+            
+            // Show item details
+            ui.game.itemDetails.classList.remove('hidden');
+            ui.game.itemName.textContent = itemData.name;
+            ui.game.itemDescription.textContent = itemData.description;
+            
+            // Store selected item index
+            ui.game.itemDetails.dataset.selectedItem = index;
+            
+            // Show/hide action buttons based on item type
+            ui.buttons.useItem.classList.remove('hidden');
+            ui.buttons.equipItem.classList.add('hidden');
+            
+            if (itemData.type === 'weapon' || itemData.type === 'armor') {
+                ui.buttons.equipItem.classList.remove('hidden');
+            }
+        }
+
+        function useSelectedItem() {
+            const index = parseInt(ui.game.itemDetails.dataset.selectedItem);
+            if (isNaN(index)) return;
+            
+            const item = gameState.character.inventory[index];
+            if (!item) return;
+            
+            const itemData = gameData.items[item.id];
+            if (!itemData || itemData.type !== 'consumable') return;
+            
+            // Apply item effects
+            if (itemData.effect) {
+                let effectsApplied = false;
+                
+                Object.entries(itemData.effect).forEach(([stat, value]) => {
+                    if (stat === 'health') {
+                        if (gameState.character.health < gameState.character.maxHealth) {
+                            gameState.character.health += value;
+                            if (gameState.character.health > gameState.character.maxHealth) {
+                                gameState.character.health = gameState.character.maxHealth;
+                            }
+                            effectsApplied = true;
+                        }
+                    }
+                    
+                    if (stat === 'mana') {
+                        if (gameState.character.mana < gameState.character.maxMana) {
+                            gameState.character.mana += value;
+                            if (gameState.character.mana > gameState.character.maxMana) {
+                                gameState.character.mana = gameState.character.maxMana;
+                            }
+                            effectsApplied = true;
+                        }
+                    }
+                });
+                
+                if (effectsApplied) {
+                    // Remove item from inventory
+                    gameState.character.inventory.splice(index, 1);
+                    
+                    // Update character UI
+                    updateCharacterUI();
+                    
+                    // Update inventory
+                    updateInventoryUI();
+                    
+                    showModal('Item Used', `You used ${itemData.name}.`, 'OK', null, () => {});
+                } else {
+                    showModal('Cannot Use', `You cannot use ${itemData.name} right now.`, 'OK', null, () => {});
+                }
+            }
+        }
+
+        function equipSelectedItem() {
+            const index = parseInt(ui.game.itemDetails.dataset.selectedItem);
+            if (isNaN(index)) return;
+            
+            const item = gameState.character.inventory[index];
+            if (!item) return;
+            
+            const itemData = gameData.items[item.id];
+            if (!itemData || !itemData.slot) return;
+            
+            // Check if slot already has an item
+            const currentEquipment = gameState.character.equipment[itemData.slot];
+            
+            // Remove stats from current equipment if exists
+            if (currentEquipment) {
+                const currentItemData = gameData.items[currentEquipment.id];
+                if (currentItemData && currentItemData.effect) {
+                    Object.entries(currentItemData.effect).forEach(([stat, value]) => {
+                        if (stat === 'strength' || stat === 'intelligence' || 
+                            stat === 'dexterity' || stat === 'charisma') {
+                            gameState.character.stats[stat] -= value;
+                        }
+                        
+                        if (stat === 'maxHealth') {
+                            gameState.character.maxHealth -= value;
+                            if (gameState.character.health > gameState.character.maxHealth) {
+                                gameState.character.health = gameState.character.maxHealth;
+                            }
+                        }
+                        
+                        if (stat === 'maxMana') {
+                            gameState.character.maxMana -= value;
+                            if (gameState.character.mana > gameState.character.maxMana) {
+                                gameState.character.mana = gameState.character.maxMana;
+                            }
+                        }
+                    });
+                }
+                
+                // Add current equipment back to inventory
+                gameState.character.inventory.push({
+                    id: currentEquipment.id,
+                    quantity: 1
+                });
+            }
+            
+            // Remove new equipment from inventory
+            gameState.character.inventory.splice(index, 1);
+            
+            // Equip new item
+            gameState.character.equipment[itemData.slot] = {
+                id: item.id
+            };
+            
+            // Apply stats from new equipment
+            if (itemData.effect) {
+                Object.entries(itemData.effect).forEach(([stat, value]) => {
+                    if (stat === 'strength' || stat === 'intelligence' || 
+                        stat === 'dexterity' || stat === 'charisma') {
+                        gameState.character.stats[stat] += value;
+                    }
+                    
+                    if (stat === 'maxHealth') {
+                        gameState.character.maxHealth += value;
+                    }
+                    
+                    if (stat === 'maxMana') {
+                        gameState.character.maxMana += value;
+                    }
+                });
+            }
+            
+            // Update UI
+            updateCharacterUI();
+            updateInventoryUI();
+            
+            showModal('Item Equipped', `You equipped ${itemData.name}.`, 'OK', null, () => {});
+        }
+
+        function dropSelectedItem() {
+            const index = parseInt(ui.game.itemDetails.dataset.selectedItem);
+            if (isNaN(index)) return;
+            
+            const item = gameState.character.inventory[index];
+            if (!item) return;
+            
+            const itemData = gameData.items[item.id];
+            if (!itemData) return;
+            
+            showModal('Drop Item', `Are you sure you want to drop ${itemData.name}?`, 'Drop', 'Cancel', () => {
+                // Remove item from inventory
+                gameState.character.inventory.splice(index, 1);
+                
+                // Update inventory
+                updateInventoryUI();
+            });
+        }
+
+        // UI helpers
+        function showScreen(screenId) {
+            // Hide all screens
+            Object.values(ui.screens).forEach(screen => {
+                screen.classList.add('hidden');
+            });
+            
+            // Show requested screen
+            ui.screens[screenId].classList.remove('hidden');
+        }
+
+        function showModal(title, content, confirmText, cancelText, onConfirm) {
+            // Set modal content
+            ui.modal.title.textContent = title;
+            ui.modal.content.innerHTML = content;
+            
+            // Set button text
+            ui.modal.confirm.textContent = confirmText;
+            
+            // Show/hide cancel button
+            if (cancelText) {
+                ui.modal.cancel.textContent = cancelText;
+                ui.modal.cancel.classList.remove('hidden');
+            } else {
+                ui.modal.cancel.classList.add('hidden');
+            }
+            
+            // Set confirm handler
+            ui.modal.confirm.onclick = () => {
+                hideModal();
+                if (onConfirm) onConfirm();
+            };
+            
+            // Set cancel handler
+            ui.modal.cancel.onclick = hideModal;
+            
+            // Show modal
+            ui.modal.container.classList.remove('hidden');
+        }
+
+        function hideModal() {
+            ui.modal.container.classList.add('hidden');
+        }
+
+        // Utility functions
+        function capitalize(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
